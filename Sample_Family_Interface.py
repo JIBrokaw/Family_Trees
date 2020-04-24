@@ -27,14 +27,14 @@ def get_data(family, member):
 
 if __name__ == "__main__":
     my_fam = Family_Tree_Framework.setup_family(People,2014,7)
-    print("\nWelcome to the History of the Kwah. \n\tEnter a Kwah member's name to learn their lineage. \n\tEnter a graduation year to get the Kwah roster of that social class. \n\tType 'exit' to quit.")
+    print("\nWelcome to the History of the Organization. \n\tEnter an organization member's name to learn their lineage. \n\tEnter a graduation year to get the roster of that social class. \n\tType 'exit' to quit.")
     while True:
         person = input('\nWhat would you like to know? ').lower()
         if person == 'exit':
             break
         try:
             year = int(person)
-            Family_Tree_Framework.print_roster(year, Kwahlings, 'The Choir members of the class of ', 5)
+            Family_Tree_Framework.print_roster(year, People, 'The members of the class of ', 5)
         except ValueError:
             try:
                 person = my_fam.find_member(person)
