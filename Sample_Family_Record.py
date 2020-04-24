@@ -1,4 +1,5 @@
-#[Name, Nicknames, Year, Big, Families, [Voice Part, Officer]]
+#Post-formatting format needed [Name, Nicknames, Year, Big, Families, [Voice Part, Officer]]
+#Storage format ['Name', ['Nickname'], 'Year', ['Big'], ['Family name'], 'Voice Part', ['Officer position (years)']]
 People = {
     2014: [
         ['Chantalle Ashford', ['Chantalle'], '2014', [], ['u'], 'S2', ['Vice President (2012-2013)', 'President (2013-2014)']]
