@@ -3,7 +3,7 @@
 People = {
     2014: [
         ['Chantalle Ashford', ['Chantalle'], '2014', [], ['u'], 'S2', ['Vice President (2012-2013)', 'President (2013-2014)']]
-    ]
+    ],
     2015: [
         #Sopranos
         ['Heather Jones', ['Heather'], '2015', [], ['u'], 'S1', ['President (2014-2015)']]
