@@ -38,6 +38,8 @@ def get_data(family, member):
         #     sibString = sibString + '\tTwin(s): ' + ' and '.join(i.get_name() for i in member.get_twins())
 
     fandom = member.get_other_data()[0]
+    if type(fandom) is not list:
+        fandom = [fandom]
     fandomstring = ''
     if len(fandom) > 0:
         fandomstring = '\n\tFandom Affiliation: ' + '\n\t\t\t   '.join(i for i in fandom)
@@ -51,7 +53,7 @@ def get_data(family, member):
 if __name__ == "__main__":
     start_year = 2019
     #my_fam = Family_Tree_Framework.setup_family(Kwahlings,start_year,7)
-    my_fam = Family_Tree_Framework.setup_family(People,start_year,6)
+    my_fam = Family_Tree_Framework.setup_family('Sample_Family_Record.csv',start_year,6)
     print("\nWelcome to the History of the Organization. \n\tEnter a member's name to learn their lineage. \n\tEnter a graduation year to get the roster of that social class. \n\tType 'exit' to quit.")
     while True:
         person = input('\nWhat would you like to know? ').lower()
@@ -59,7 +61,7 @@ if __name__ == "__main__":
             break
         try:
             year = int(person)
-            Family_Tree_Framework.print_roster(year, People, 'The Organization members of the class of ', 5)
+            Family_Tree_Framework.print_roster(year, 'Sample_Family_Record.csv', 'The Organization members of the class of ', 5)
         except ValueError:
             try:
                 person = my_fam.find_member(person)

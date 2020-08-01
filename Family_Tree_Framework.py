@@ -1,7 +1,8 @@
 #format needed for data input: ['Name', [nicknames], 'year', [Bigs], [family founded], [other data]]
 
-
+#import Kwah_record.csv
 from collections import deque
+import csv
 
 class Family:
     class __Member:
@@ -42,9 +43,10 @@ class Family:
             return self.__other_data
 
         def update_families(self,family):
-            if family.startswith('NOT'):
-                self.__families.remove(family)
-            elif family not in self.__families:
+            if family in self.__families:
+                if family.startswith('NOT'):
+                    self.__families.remove(family)
+            else:
                 if "NOT " + family not in self.__families:
                     self.__families.append(family)
 
@@ -96,10 +98,10 @@ class Family:
                         answer = temp[(len(temp)-1)]
                     for i in key:
                         if answer in i:
-                            return i
-                return answer
+                            return i.rstrip("1234567890() ")
+                return answer.rstrip("1234567890() ")
             else:
-                return key[0]
+                return key[0].rstrip("1234567890() ")
         except:
             if ' ' in name:
                 name = name.split()
@@ -121,22 +123,39 @@ class Family:
 
     #Public function, input member's data and link to structure.
     def add_new_member(self, name, nicknames, year, Bigs, families, other_data):
+        if type(Bigs) != list:
+            Bigs = [Bigs]
+        if type(nicknames) != list:
+            nicknames = [nicknames]
+        if type(families) != list:
+            families = [families]
+
+        for big in Bigs:
+            if big.lower() not in self.__member_list:
+                raise KeyError
+
         for i in range(len(Bigs)):
             Bigs[i] = self.__member_list[Bigs[i].lower()]
+
         #create member and add names to rosters
         member = self.__Member(name, year, families, other_data)
         self.__member_list[name.lower()] = member
         name_words = name.split()
         for i in name_words:
+            if len(member.get_grade()) > 4:
+                grade = member.get_grade().strip('abcdefghijklmnopqrstuvwxyz() ')
+                grade = grade[:4]
+            else:
+                grade = member.get_grade()
             try:
-                self.__full_name_lookup[i.lower()].append(member.get_name().lower())
+                self.__full_name_lookup[i.lower()].append(member.get_name().lower() + " (" + grade + ")")
             except:
-                self.__full_name_lookup[i.lower()] = [member.get_name().lower()]
+                self.__full_name_lookup[i.lower()] = [member.get_name().lower() + " (" + grade + ")"]
         for i in nicknames:
             try:
-                self.__full_name_lookup[i.lower()].append(member.get_name().lower())
+                self.__full_name_lookup[i.lower()].append(member.get_name().lower() + " (" + grade + ")")
             except:
-                self.__full_name_lookup[i.lower()] = [member.get_name().lower()]
+                self.__full_name_lookup[i.lower()] = [member.get_name().lower() + " (" + grade + ")"]
         #link member in with family
         self.__adjacent_Littles[member] = []
         self.__adjacent_Bigs[member] = Bigs
@@ -150,9 +169,13 @@ class Family:
             for j in i.get_families():
                 member.update_families(j)
         #remove families
-        for i in member.get_families():
-            if i.startswith('NOT'):
-                member.update_families(i)
+        pointer = 0
+        while pointer < len(member.get_families()):
+            if member.get_families()[pointer].startswith('NOT'):
+                member.update_families(member.get_families()[pointer])
+            else:
+                pointer += 1
+
         #record height
         self.__update_heritage(member)
         self.__update_legacy(member)
@@ -230,14 +253,14 @@ class Family:
 
 
     #TRAVERSAL METHODS
-        #Loops through all Bigs until someone has no Big listed. Updates the Stack in place
+        #Loops through all Bigs until someone has no Big listed. Updates the Stack of members in place
     def __Big_trail(self,member,Ancestors):
         Bigs = self.__adjacent_Bigs[member]
         for i in range(len(Bigs)):
             Ancestors.append(Bigs[i])
             self.__Big_trail(Bigs[i],Ancestors)
 
-        #Loops through all Littles until someone has no Little listed. Updates the Queue in place
+        #Loops through all Littles until someone has no Little listed. Updates the Queue of members in place
     def __Little_trail(self,member,Descendants,depth):
         Littles = self.__adjacent_Littles[member]
         # for i in range(1,len(Littles)):
@@ -338,7 +361,7 @@ class Family:
                     pass
                 elif j == 0 or type(little_descriptions[1]) is str:
                     phrase = '  '*(person_data[1] + member.get_depth() + 2) + little_descriptions[j]
-                    if not phrase.isspace() and phrase != '' and phrase.lstrip(' ') not in (statements[i].lstrip(' ') for i in range(count +2)):
+                    if not phrase.isspace() and phrase != '':
                         statements[count + 3] = phrase
                         count += 1
                 else:
@@ -357,6 +380,10 @@ class Family:
             #         statements[count + 3] = phrase
             #         count += 1
 
+        for i in range(len(statements)):
+            for j in range(i + 1, len(statements)):
+                if statements[i].strip() == statements[j].strip():
+                    statements[j] = ''
         return('\n'.join("\t" + i for i in statements if i != '' and i is not None))
 
 #Converts the input record data into a family structure.
@@ -364,44 +391,83 @@ def setup_family(record,year,expected_len):
     family_name = Family()
     year = year
     premature = deque()
-    while year in record:
-        for i in range(len(premature)):
-            trial = premature.popleft()
-            try:
-                family_name.add_new_member(trial[0],trial[1],trial[2],trial[3],trial[4],[trial[i] for i in range(5, len(trial))])
-            except KeyError:
-                premature.append(trial)
-
-        for i in record[year]:
-            try:
-                # if len(i) < expected_len:
-                #     print('short' + i[0])
-                # if len(i) > expected_len:
-                #     print('long' + i[0])
-                # if len(i) == expected_len:
-                family_name.add_new_member(i[0],i[1],i[2],i[3],i[4], [i[j] for j in range(5, len(i))])
-            except KeyError:
-                premature.append(i)
-        year += 1
+    with open(record,'r') as file:
+        file.readline()
+        for line in file:
+            if line.startswith(',') or line.startswith('20') or line.startswith('19'):
+                for i in range(len(premature)):
+                    trial = premature.popleft()
+                    try:
+                        family_name.add_new_member(trial[0],trial[1],trial[2],trial[3],trial[4],[trial[i] for i in range(5, len(trial))])
+                    except:
+                        premature.append(trial)
+            else:
+                start_pointer = 0
+                listing = False
+                person = []
+                sublist = []
+                for end_pointer in range(len(line)):
+                    if line[end_pointer] == '"':
+                        if listing == False:
+                            listing = True
+                            start_pointer = end_pointer + 1
+                            sublist = []
+                        else:
+                            listing = False
+                            sublist.append(line[start_pointer:end_pointer])
+                            person.append(sublist)
+                            start_pointer = end_pointer + 2
+                    elif line[end_pointer] == ',':
+                        if listing == False:
+                            if line[end_pointer-1] != '"':
+                                if start_pointer == end_pointer:
+                                    person.append([])
+                                else:
+                                    person.append(line[start_pointer:end_pointer])
+                        else:
+                            sublist.append(line[start_pointer:end_pointer])
+                        start_pointer = end_pointer+1
+                        while line[start_pointer] == ' ':
+                            start_pointer += 1
+                if line[len(line)-2] == ',':
+                    person.append('')
+                elif line[len(line)-2] != '"':
+                    person.append(line[start_pointer:len(line)-1])
+                try:
+                    if len(person) < expected_len:
+                        print('short' + person[0])
+                    if len(person) > expected_len:
+                        print('long' + person[0])
+                    if len(person) == expected_len:
+                        family_name.add_new_member(person[0],person[1],person[2],person[3],person[4], [person[j] for j in range(5, len(person))])
+                except:
+                    premature.append(person)
+            year += 1
     if len(premature) > 0:
         print(premature)
         raise KeyError
     return family_name
 
-#prints the input year's list of students, properly formatted
 def print_roster(year, record, intro_string, dataKey):
     print('\n' + intro_string + str(year) + '\n')
-    for i in record[year]:
-        additional_data = ' (' + i[dataKey] + ')'
-        year_bonus = ''
-        if not i[2].endswith(str(year)):
-            if 'w' in i[2]:
-                if not i[2].startswith('('):
-                    year_bonus = ' (graduated ' + (i[2].split()[0]) + ')'
-            else:
-                year_bonus = ' ' + ' '.join(i[2].split()[j] for j in range(1,3))
-        print('\t' + i[0] + additional_data + year_bonus)
-
+    with open(record, 'r', newline = '') as file:
+        reader = csv.reader(file)
+        in_year = False
+        for row in reader:
+            if row[0] == str(year):
+                in_year = True
+            if in_year and row[2] != '':
+                additional_data = ' (' + row[dataKey] + ')'
+                year_bonus = ''
+                if not row[2].endswith(str(year)):
+                    if 'w' in row[2]:
+                        if not row[2].startswith('('):
+                            year_bonus = ' (graduated ' + (row[2].split()[0]) + ')'
+                    else:
+                        year_bonus = ' ' + ' '.join(row[2].split()[j] for j in range(1,3))
+                print('\t' + row[0] + additional_data + year_bonus)
+            if row[0] == str(year+1):
+                break
 
 if __name__ == "__main__":
     pass
