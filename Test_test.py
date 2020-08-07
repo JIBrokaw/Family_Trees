@@ -14,7 +14,4 @@ class DSQTester(unittest.TestCase):
         self.assertEqual(get_data(self.__family,self.__family.find_member('anakin')), 'Anakin Skywalker:\n\tClass: 2020\n\tFandom Affiliation: Star Wars\n\nBig(s): Shmi Skywalker\nLittle(s): Luke Skywalker and Leia Skywalker\nCo-Big(s): Padme Amidala\nFamily: Skywalker Clan\nGenerations Descended: 2')
 
     def test_person_lineage(self):
-        self.assertEqual(self.__family.get_lineage(self.__family.find_member('anakin')),'''
-        > Shmi Skywalker begat Anakin Skywalker.
-            Anakin Skywalker and Padme Amidala begat Leia Skywalker and Luke Skywalker.
-              Han Solo and Leia Skywalker begat Ben Solo.''')
+        self.assertEqual(self.__family.get_lineage(self.__family.find_member('anakin')),'\t> Shmi Skywalker begat Anakin Skywalker.\t    Anakin Skywalker and Padme Amidala begat Leia Skywalker and Luke Skywalker.\t    Han Solo and Leia Skywalker begat Ben Solo.')
