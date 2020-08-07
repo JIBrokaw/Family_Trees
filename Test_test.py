@@ -1,5 +1,6 @@
 import unittest
 import Family_Tree_Framework
+from Sample_Family_Interface import get_data
 
 class DSQTester(unittest.TestCase):
     def setUp(self):
