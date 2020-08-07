@@ -11,15 +11,7 @@ class DSQTester(unittest.TestCase):
 
         #setup tests
     def test_person_data(self):
-        self.assertEqual(get_data(self.__family,self.__family.find_member('anakin')), '''Anakin Skywalker:
-        Class: 2020
-        Fandom Affiliation: Star Wars
-
-Big(s): Shmi Skywalker
-Little(s): Luke Skywalker and Leia Skywalker
-Co-Big(s): Padme Amidala
-Family: Skywalker Clan
-Generations Descended: 2''')
+        self.assertEqual(get_data(self.__family,self.__family.find_member('anakin')), 'Anakin Skywalker:\n\tClass: 2020\n\tFandom Affiliation: Star Wars\n\nBig(s): Shmi Skywalker\nLittle(s): Luke Skywalker and Leia Skywalker\nCo-Big(s): Padme Amidala\nFamily: Skywalker Clan\nGenerations Descended: 2')
 
     def test_person_lineage(self):
         self.assertEqual(self.__family.get_lineage(self.__family.find_member('anakin')),'''
